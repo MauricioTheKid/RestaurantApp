@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">RestaurantApp</string>
+    <string name="login">Iniciar Sesión</string>
+    <string name="register">Registrarse</string>
+    <string name="usuario">Usuario</string>
+    <string name="password">Contraseña</string>
+    <string name="email">Correo Electrónico</string>
+    <string name="confirm_password">Confirmar Contraseña</string>
+
+    <!-- Menú -->
+    <string name="menu_inicio">Inicio</string>
+    <string name="menu_productos">Productos</string>
+    <string name="menu_perfil">Perfil</string>
+    <string name="menu_pedidos">Mis Pedidos</string>
+    <string name="menu_salir">Salir</string>
+    <string name="menu_config">Configuración</string>
+
+    <!-- Drawer -->
+    <string name="nav_drawer_open">Abrir menú</string>
+    <string name="nav_drawer_close">Cerrar menú</string>
+</resources>

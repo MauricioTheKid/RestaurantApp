@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_nuevo_pedido"
+            android:icon="@android:drawable/ic_menu_add"
+            android:title="🆕 Nuevo Pedido" />
+        <item
+            android:id="@+id/nav_inicio"
+            android:icon="@drawable/ic_inicio"
+            android:title="Inicio" />
+        <item
+            android:id="@+id/nav_menu"
+            android:icon="@drawable/ic_productos"
+            android:title="Productos" />
+        <item
+            android:id="@+id/nav_pedidos"
+            android:icon="@android:drawable/ic_menu_edit"
+            android:title="Mis Pedidos" />
+        <item
+            android:id="@+id/nav_ventas"
+            android:icon="@android:drawable/ic_menu_report_image"
+            android:title="Ventas" />
+        <item
+            android:id="@+id/nav_perfil"
+            android:icon="@drawable/ic_perfil"
+            android:title="Perfil" />
+    </group>
+
+    <item android:title="Opciones">
+        <menu>
+            <item
+                android:id="@+id/nav_config"
+                android:icon="@android:drawable/ic_menu_preferences"
+                android:title="Configuración" />
+            <item
+                android:id="@+id/nav_salir"
+                android:icon="@android:drawable/ic_menu_close_clear_cancel"
+                android:title="Salir" />
+        </menu>
+    </item>
+
+</menu>
