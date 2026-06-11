@@ -52,6 +52,14 @@
             android:theme="@style/Theme.RestaurantApp.NoActionBar"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- Pantalla Editar Pedido -->
+        <activity
+            android:name=".activities.EditarPedidoActivity"
+            android:exported="false"
+            android:parentActivityName=".activities.HomeActivity"
+            android:theme="@style/Theme.RestaurantApp.NoActionBar"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- Pantalla de Configuración -->
         <activity
             android:name=".activities.ConfiguracionActivity"

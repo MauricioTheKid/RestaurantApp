@@ -1,6 +1,7 @@
 package com.example.restaurantapp.fragments;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,8 +18,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.example.restaurantapp.R;
+import com.example.restaurantapp.activities.EditarPedidoActivity;
 import com.example.restaurantapp.database.AppDatabase;
 import com.example.restaurantapp.models.Pedido;
+import java.util.List;
 
 public class PedidosFragment extends Fragment {
 
@@ -26,7 +29,6 @@ public class PedidosFragment extends Fragment {
     private SwipeRefreshLayout swipeRefreshLayout;
     private SharedPreferences preferences;
     private AppDatabase db;
-    private String usuarioRol;
 
     @Nullable
     @Override
@@ -37,7 +39,6 @@ public class PedidosFragment extends Fragment {
 
         db = AppDatabase.getInstance(requireContext());
         preferences = requireContext().getSharedPreferences("RestaurantPrefs", 0);
-        usuarioRol = preferences.getString("userRole", "mesero"); // mesero, cajero, dueño
 
         cargarPedidos();
 
@@ -55,7 +56,7 @@ public class PedidosFragment extends Fragment {
     private void cargarPedidos() {
         layoutPedidos.removeAllViews();
 
-        java.util.List<Pedido> pedidos = db.pedidoDao().getAllPedidos();
+        List<Pedido> pedidos = db.pedidoDao().getAllPedidos();
 
         if (pedidos == null || pedidos.isEmpty()) {
             TextView tvVacio = new TextView(getContext());
@@ -118,7 +119,29 @@ public class PedidosFragment extends Fragment {
         layoutBotones.setOrientation(LinearLayout.HORIZONTAL);
         layoutBotones.setPadding(0, 15, 0, 0);
 
-        // Botón Cancelar (solo si no está cancelado o pagado)
+        // Botón EDITAR (solo si está pendiente)
+        if (estado.equals("pendiente")) {
+            Button btnEditar = new Button(getContext());
+            btnEditar.setText("✏️ Editar");
+            btnEditar.setBackgroundColor(0xFF2196F3);
+            btnEditar.setTextColor(0xFFFFFFFF);
+            btnEditar.setPadding(16, 8, 16, 8);
+
+            LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
+                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1
+            );
+            btnParams.setMargins(0, 0, 8, 0);
+            btnEditar.setLayoutParams(btnParams);
+
+            btnEditar.setOnClickListener(v -> {
+                Intent intent = new Intent(getContext(), EditarPedidoActivity.class);
+                intent.putExtra("pedido_id", pedido.getId());
+                startActivity(intent);
+            });
+            layoutBotones.addView(btnEditar);
+        }
+
+        // Botón CANCELAR (solo si no está cancelado ni pagado)
         if (!estado.equals("cancelado") && !estado.equals("pagado")) {
             Button btnCancelar = new Button(getContext());
             btnCancelar.setText("❌ Cancelar");
@@ -129,36 +152,36 @@ public class PedidosFragment extends Fragment {
             LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
                     0, LinearLayout.LayoutParams.WRAP_CONTENT, 1
             );
-            btnParams.setMargins(0, 0, 8, 0);
+            btnParams.setMargins(8, 0, 8, 0);
             btnCancelar.setLayoutParams(btnParams);
 
             btnCancelar.setOnClickListener(v -> confirmarCancelar(pedido));
             layoutBotones.addView(btnCancelar);
         }
 
-        // Botón Entregar (solo si está pendiente)
+        // Botón ENTREGAR (solo si está pendiente)
         if (estado.equals("pendiente")) {
             Button btnEntregar = new Button(getContext());
             btnEntregar.setText("✅ Entregar");
-            btnEntregar.setBackgroundColor(0xFF2196F3);
+            btnEntregar.setBackgroundColor(0xFF4CAF50);
             btnEntregar.setTextColor(0xFFFFFFFF);
             btnEntregar.setPadding(16, 8, 16, 8);
 
             LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
                     0, LinearLayout.LayoutParams.WRAP_CONTENT, 1
             );
-            btnParams.setMargins(8, 0, 8, 0);
+            btnParams.setMargins(8, 0, 0, 0);
             btnEntregar.setLayoutParams(btnParams);
 
             btnEntregar.setOnClickListener(v -> cambiarEstado(pedido, "entregado"));
             layoutBotones.addView(btnEntregar);
         }
 
-        // Botón Pagar (solo si está entregado)
+        // Botón PAGAR (solo si está entregado) - aparece automáticamente
         if (estado.equals("entregado")) {
             Button btnPagar = new Button(getContext());
             btnPagar.setText("💰 Pagar");
-            btnPagar.setBackgroundColor(0xFF4CAF50);
+            btnPagar.setBackgroundColor(0xFFFF9800);
             btnPagar.setTextColor(0xFFFFFFFF);
             btnPagar.setPadding(16, 8, 16, 8);
 
