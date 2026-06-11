@@ -4,15 +4,18 @@ import android.app.AlertDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -28,7 +31,8 @@ public class MenuFragment extends Fragment implements ProductoAdminAdapter.OnPro
 
     private RecyclerView rvProductos;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private SearchView searchView;
+    private EditText etBuscarProducto;
+    private ImageView ivLimpiarBusqueda;
     private Button btnAgregarProducto;
     private ProductoAdminAdapter adapter;
     private AppDatabase db;
@@ -42,8 +46,13 @@ public class MenuFragment extends Fragment implements ProductoAdminAdapter.OnPro
 
         rvProductos = view.findViewById(R.id.rvProductos);
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
-        searchView = view.findViewById(R.id.searchView);
+        etBuscarProducto = view.findViewById(R.id.etBuscarProducto);
+        ivLimpiarBusqueda = view.findViewById(R.id.ivLimpiarBusqueda);
         btnAgregarProducto = view.findViewById(R.id.btnAgregarProducto);
+
+        // FORZAR COLOR DE TEXTO NEGRO EN EL EditText DE BÚSQUEDA
+        etBuscarProducto.setTextColor(0xFF000000);
+        etBuscarProducto.setHintTextColor(0xFF888888);
 
         rvProductos.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -51,22 +60,29 @@ public class MenuFragment extends Fragment implements ProductoAdminAdapter.OnPro
 
         cargarProductos();
 
-        // Buscador
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        etBuscarProducto.addTextChangedListener(new TextWatcher() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
-                filtrarProductos(query);
-                return true;
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filtrarProductos(s.toString());
+                if (s.toString().trim().isEmpty()) {
+                    ivLimpiarBusqueda.setVisibility(View.GONE);
+                } else {
+                    ivLimpiarBusqueda.setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
-                filtrarProductos(newText);
-                return true;
-            }
+            public void afterTextChanged(Editable s) {}
         });
 
-        // Swipe to refresh
+        ivLimpiarBusqueda.setOnClickListener(v -> {
+            etBuscarProducto.setText("");
+            filtrarProductos("");
+        });
+
         swipeRefreshLayout.setOnRefreshListener(() -> {
             cargarProductos();
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
@@ -75,7 +91,6 @@ public class MenuFragment extends Fragment implements ProductoAdminAdapter.OnPro
             }, 1000);
         });
 
-        // Botón Agregar Producto
         btnAgregarProducto.setOnClickListener(v -> mostrarDialogoAgregar());
 
         return view;
@@ -88,7 +103,6 @@ public class MenuFragment extends Fragment implements ProductoAdminAdapter.OnPro
             listaOriginal = db.productoDao().getAllProductos();
         }
         listaFiltrada = new ArrayList<>(listaOriginal);
-        // Pasar getContext() al adaptador
         adapter = new ProductoAdminAdapter(listaFiltrada, db, this, getContext());
         rvProductos.setAdapter(adapter);
     }

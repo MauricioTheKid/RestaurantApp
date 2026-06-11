@@ -25,6 +25,11 @@ public class ProductoSelectorAdapter extends RecyclerView.Adapter<ProductoSelect
         this.listener = listener;
     }
 
+    public void actualizarLista(List<Producto> nuevaLista) {
+        this.productos = nuevaLista;
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -38,7 +43,6 @@ public class ProductoSelectorAdapter extends RecyclerView.Adapter<ProductoSelect
         holder.tvNombre.setText(producto.getNombre());
         holder.tvPrecio.setText("$" + String.format("%.2f", producto.getPrecio()));
 
-        // IMPORTANTE: Usar la posición para obtener el producto correcto
         holder.btnAgregar.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onProductoClick(producto);

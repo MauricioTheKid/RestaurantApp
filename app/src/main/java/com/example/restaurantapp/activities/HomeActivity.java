@@ -35,37 +35,22 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Aplicar tema guardado ANTES de cargar la vista
-        preferences = getSharedPreferences("RestaurantPrefs", MODE_PRIVATE);
-        int themeMode = preferences.getInt("theme_mode", 2);
-        switch (themeMode) {
-            case 0:
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                break;
-            case 1:
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                break;
-            case 2:
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-                break;
-        }
+        // FORZAR MODO CLARO
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        // Inicializar vistas
         toolbar = findViewById(R.id.toolbar);
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
 
-        // Configurar Toolbar
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("Inicio");
         }
 
-        // Configurar Navigation Drawer
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawerLayout, toolbar,
                 R.string.nav_drawer_open,
@@ -74,10 +59,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
 
-        // Obtener usuario logueado
+        preferences = getSharedPreferences("RestaurantPrefs", MODE_PRIVATE);
         usuarioLogueado = preferences.getString("loggedUser", "Usuario");
 
-        // Configurar BottomNavigationView
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.nav_inicio) {
@@ -102,7 +86,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             return false;
         });
 
-        // Cargar fragment inicial
         if (savedInstanceState == null) {
             cargarFragment(new InicioFragment());
             bottomNavigationView.setSelectedItemId(R.id.nav_inicio);
@@ -154,7 +137,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             Intent intent = new Intent(this, ConfiguracionActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_salir) {
-            // Cerrar sesión
             SharedPreferences.Editor editor = preferences.edit();
             editor.putBoolean("isLoggedIn", false);
             editor.apply();

@@ -31,13 +31,44 @@
 
     </LinearLayout>
 
-    <androidx.appcompat.widget.SearchView
-        android:id="@+id/searchView"
+    <!-- Barra de búsqueda personalizada -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:queryHint="🔍 Buscar producto..."
+        android:orientation="horizontal"
+        android:background="#F5F5F5"
+        android:padding="8dp"
         android:layout_marginBottom="16dp"
-        android:background="#FFFFFF" />
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_search_category_default"
+            android:tint="#FF5722" />
+
+        <EditText
+            android:id="@+id/etBuscarProducto"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="🔍 Buscar producto..."
+            android:inputType="text"
+            android:background="@android:color/transparent"
+            android:padding="8dp"
+            android:textSize="14sp"
+            android:textColor="#333333"
+            android:textColorHint="#999999" />
+
+        <ImageView
+            android:id="@+id/ivLimpiarBusqueda"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:tint="#999999"
+            android:visibility="gone" />
+
+    </LinearLayout>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefreshLayout"

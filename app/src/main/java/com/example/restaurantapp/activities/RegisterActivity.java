@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import com.example.restaurantapp.R;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -17,10 +18,12 @@ public class RegisterActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Forzar modo claro
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        // Inicializar vistas
         etUsuario = findViewById(R.id.etUsuario);
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
@@ -28,10 +31,18 @@ public class RegisterActivity extends AppCompatActivity {
         btnGuardar = findViewById(R.id.btnGuardar);
         btnRegresar = findViewById(R.id.btnRegresar);
 
-        // Inicializar SharedPreferences
+        // FORZAR COLOR DE TEXTO NEGRO EN TODOS LOS EditText
+        etUsuario.setTextColor(0xFF000000);
+        etUsuario.setHintTextColor(0xFF888888);
+        etEmail.setTextColor(0xFF000000);
+        etEmail.setHintTextColor(0xFF888888);
+        etPassword.setTextColor(0xFF000000);
+        etPassword.setHintTextColor(0xFF888888);
+        etConfirmPassword.setTextColor(0xFF000000);
+        etConfirmPassword.setHintTextColor(0xFF888888);
+
         preferences = getSharedPreferences("RestaurantPrefs", MODE_PRIVATE);
 
-        // Botón Guardar
         btnGuardar.setOnClickListener(v -> {
             String usuario = etUsuario.getText().toString().trim();
             String email = etEmail.getText().toString().trim();
@@ -83,9 +94,6 @@ public class RegisterActivity extends AppCompatActivity {
             finish(); // Regresar al Login
         });
 
-        // Botón Regresar
-        btnRegresar.setOnClickListener(v -> {
-            finish();
-        });
+        btnRegresar.setOnClickListener(v -> finish());
     }
 }

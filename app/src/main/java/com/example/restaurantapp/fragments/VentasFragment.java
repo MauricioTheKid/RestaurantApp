@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.example.restaurantapp.R;
 import com.example.restaurantapp.database.AppDatabase;
+import com.example.restaurantapp.models.DetallePedido;
 import com.example.restaurantapp.models.Pedido;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -21,6 +22,7 @@ public class VentasFragment extends Fragment {
 
     private LinearLayout layoutVentas;
     private AppDatabase db;
+    private SimpleDateFormat sdfFecha = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
 
     @Nullable
     @Override
@@ -42,31 +44,27 @@ public class VentasFragment extends Fragment {
 
         // Calcular totales
         double totalHoy = 0;
-        double totalSemana = 0;
-        double totalMes = 0;
         int cantidadPedidos = pedidosPagados.size();
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        String hoy = sdf.format(new Date());
+        SimpleDateFormat sdfDia = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String hoy = sdfDia.format(new Date());
 
         for (Pedido pedido : pedidosPagados) {
             totalHoy += pedido.getTotal();
-            totalSemana += pedido.getTotal();
-            totalMes += pedido.getTotal();
         }
 
         // Tarjeta de resumen
-        LinearLayout resumenCard = crearCardResumen(totalHoy, totalSemana, totalMes, cantidadPedidos);
+        LinearLayout resumenCard = crearCardResumen(totalHoy, cantidadPedidos);
         layoutVentas.addView(resumenCard);
 
-        // Título de ventas recientes
-        TextView tituloRecientes = new TextView(getContext());
-        tituloRecientes.setText("📋 Ventas Recientes");
-        tituloRecientes.setTextSize(18);
-        tituloRecientes.setTextColor(0xFF333333);
-        tituloRecientes.setTypeface(null, android.graphics.Typeface.BOLD);
-        tituloRecientes.setPadding(0, 20, 0, 10);
-        layoutVentas.addView(tituloRecientes);
+        // Título de detalle de ventas
+        TextView tituloDetalle = new TextView(getContext());
+        tituloDetalle.setText("🧾 DETALLE DE VENTAS");
+        tituloDetalle.setTextSize(16);
+        tituloDetalle.setTextColor(0xFF333333);
+        tituloDetalle.setTypeface(null, android.graphics.Typeface.BOLD);
+        tituloDetalle.setPadding(0, 20, 0, 10);
+        layoutVentas.addView(tituloDetalle);
 
         if (pedidosPagados.isEmpty()) {
             TextView tvVacio = new TextView(getContext());
@@ -77,13 +75,13 @@ public class VentasFragment extends Fragment {
             layoutVentas.addView(tvVacio);
         } else {
             for (Pedido pedido : pedidosPagados) {
-                LinearLayout card = crearCardVenta(pedido);
+                LinearLayout card = crearCardVentaConDetalle(pedido);
                 layoutVentas.addView(card);
             }
         }
     }
 
-    private LinearLayout crearCardResumen(double totalHoy, double totalSemana, double totalMes, int cantidad) {
+    private LinearLayout crearCardResumen(double totalHoy, int cantidad) {
         LinearLayout card = new LinearLayout(getContext());
         card.setOrientation(LinearLayout.VERTICAL);
         card.setPadding(20, 20, 20, 20);
@@ -122,31 +120,86 @@ public class VentasFragment extends Fragment {
         return card;
     }
 
-    private LinearLayout crearCardVenta(Pedido pedido) {
+    private LinearLayout crearCardVentaConDetalle(Pedido pedido) {
+        // Card principal
         LinearLayout card = new LinearLayout(getContext());
         card.setOrientation(LinearLayout.VERTICAL);
-        card.setPadding(15, 12, 15, 12);
+        card.setPadding(15, 15, 15, 15);
         card.setBackgroundColor(0xFFFFFFFF);
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        params.setMargins(0, 0, 0, 8);
+        params.setMargins(0, 0, 0, 12);
         card.setLayoutParams(params);
 
-        TextView tvId = new TextView(getContext());
-        tvId.setText("🆔 Pedido #" + pedido.getId() + " - Mesa " + pedido.getNumeroMesa());
-        tvId.setTextSize(14);
-        tvId.setTextColor(0xFF333333);
-        tvId.setTypeface(null, android.graphics.Typeface.BOLD);
+        // Sombra (elevación simulada)
+        card.setElevation(4);
+        card.setBackgroundResource(android.R.drawable.editbox_background);
 
+        // Encabezado del pedido
+        TextView tvEncabezado = new TextView(getContext());
+        tvEncabezado.setText("🆔 Pedido #" + pedido.getId() + " - Mesa " + pedido.getNumeroMesa());
+        tvEncabezado.setTextSize(15);
+        tvEncabezado.setTextColor(0xFF333333);
+        tvEncabezado.setTypeface(null, android.graphics.Typeface.BOLD);
+        tvEncabezado.setPadding(0, 0, 0, 8);
+        card.addView(tvEncabezado);
+
+        // Fecha y hora
+        TextView tvFecha = new TextView(getContext());
+        tvFecha.setText("📅 " + sdfFecha.format(pedido.getFecha()));
+        tvFecha.setTextSize(12);
+        tvFecha.setTextColor(0xFF888888);
+        tvFecha.setPadding(0, 0, 0, 12);
+        card.addView(tvFecha);
+
+        // Obtener detalles del pedido
+        List<DetallePedido> detalles = db.detallePedidoDao().getDetallesByPedido(pedido.getId());
+
+        // Contenedor de productos
+        LinearLayout layoutProductos = new LinearLayout(getContext());
+        layoutProductos.setOrientation(LinearLayout.VERTICAL);
+        layoutProductos.setPadding(10, 10, 10, 10);
+        layoutProductos.setBackgroundColor(0xFFF5F5F5);
+        layoutProductos.setElevation(2);
+
+        for (DetallePedido detalle : detalles) {
+            LinearLayout row = new LinearLayout(getContext());
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setPadding(0, 5, 0, 5);
+
+            TextView tvProducto = new TextView(getContext());
+            tvProducto.setText("🍽️ " + detalle.getProductoNombre() + " x" + detalle.getCantidad());
+            tvProducto.setTextSize(14);
+            tvProducto.setTextColor(0xFF333333);
+
+            TextView tvSubtotal = new TextView(getContext());
+            tvSubtotal.setText("$" + String.format("%.2f", detalle.getSubtotal()));
+            tvSubtotal.setTextSize(14);
+            tvSubtotal.setTextColor(0xFF4CAF50);
+            tvSubtotal.setTypeface(null, android.graphics.Typeface.BOLD);
+
+            LinearLayout.LayoutParams paramsProducto = new LinearLayout.LayoutParams(
+                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1
+            );
+            tvProducto.setLayoutParams(paramsProducto);
+
+            row.addView(tvProducto);
+            row.addView(tvSubtotal);
+            layoutProductos.addView(row);
+        }
+
+        card.addView(layoutProductos);
+
+        // Total del pedido
         TextView tvTotal = new TextView(getContext());
-        tvTotal.setText("💰 $" + String.format("%.2f", pedido.getTotal()));
-        tvTotal.setTextSize(14);
+        tvTotal.setText("💰 TOTAL: $" + String.format("%.2f", pedido.getTotal()));
+        tvTotal.setTextSize(15);
         tvTotal.setTextColor(0xFF4CAF50);
-
-        card.addView(tvId);
+        tvTotal.setTypeface(null, android.graphics.Typeface.BOLD);
+        tvTotal.setPadding(0, 12, 0, 0);
         card.addView(tvTotal);
 
         return card;

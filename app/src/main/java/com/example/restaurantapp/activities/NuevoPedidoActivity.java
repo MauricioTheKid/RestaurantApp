@@ -2,13 +2,18 @@ package com.example.restaurantapp.activities;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.restaurantapp.R;
@@ -24,6 +29,8 @@ import java.util.List;
 public class NuevoPedidoActivity extends AppCompatActivity {
 
     private EditText etNumeroMesa, etNotas;
+    private EditText etBuscarProducto;
+    private ImageView ivLimpiarBusqueda;
     private RecyclerView rvProductos;
     private LinearLayout layoutCarrito;
     private TextView tvSubtotal, tvImpuesto, tvTotal, tvCarritoVacio;
@@ -32,6 +39,7 @@ public class NuevoPedidoActivity extends AppCompatActivity {
 
     private AppDatabase db;
     private List<Producto> listaProductos;
+    private List<Producto> listaProductosOriginal;
     private List<ItemCarrito> carrito;
     private ProductoSelectorAdapter productoAdapter;
     private SharedPreferences preferences;
@@ -39,12 +47,16 @@ public class NuevoPedidoActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Forzar modo claro
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nuevo_pedido);
 
-        // Inicializar vistas
         etNumeroMesa = findViewById(R.id.etNumeroMesa);
         etNotas = findViewById(R.id.etNotas);
+        etBuscarProducto = findViewById(R.id.etBuscarProducto);
+        ivLimpiarBusqueda = findViewById(R.id.ivLimpiarBusqueda);
         rvProductos = findViewById(R.id.rvProductos);
         layoutCarrito = findViewById(R.id.layoutCarrito);
         tvCarritoVacio = findViewById(R.id.tvCarritoVacio);
@@ -54,113 +66,125 @@ public class NuevoPedidoActivity extends AppCompatActivity {
         tvTotal = findViewById(R.id.tvTotal);
         btnConfirmarPedido = findViewById(R.id.btnConfirmarPedido);
 
-        // Configurar Toolbar
-        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        // FORZAR COLOR DE TEXTO NEGRO EN TODOS LOS EditText
+        etNumeroMesa.setTextColor(0xFF000000);
+        etNumeroMesa.setHintTextColor(0xFF888888);
+        etNotas.setTextColor(0xFF000000);
+        etNotas.setHintTextColor(0xFF888888);
+        etBuscarProducto.setTextColor(0xFF000000);
+        etBuscarProducto.setHintTextColor(0xFF888888);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("Nuevo Pedido");
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        // Inicializar
         db = AppDatabase.getInstance(this);
         carrito = new ArrayList<>();
         preferences = getSharedPreferences("RestaurantPrefs", MODE_PRIVATE);
         usuarioId = preferences.getInt("userId", 1);
 
-        // Cargar productos
         cargarProductos();
 
-        // Configurar RecyclerView de productos
         rvProductos.setLayoutManager(new LinearLayoutManager(this));
         productoAdapter = new ProductoSelectorAdapter(listaProductos, this::agregarAlCarrito);
         rvProductos.setAdapter(productoAdapter);
 
-        // Botón confirmar pedido
+        // Configurar búsqueda personalizada
+        etBuscarProducto.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filtrarProductos(s.toString());
+                if (s.toString().trim().isEmpty()) {
+                    ivLimpiarBusqueda.setVisibility(View.GONE);
+                } else {
+                    ivLimpiarBusqueda.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        ivLimpiarBusqueda.setOnClickListener(v -> {
+            etBuscarProducto.setText("");
+            filtrarProductos("");
+        });
+
         btnConfirmarPedido.setOnClickListener(v -> confirmarPedido());
     }
 
     private void cargarProductos() {
-        listaProductos = db.productoDao().getAllProductos();
-        if (listaProductos == null || listaProductos.isEmpty()) {
-            listaProductos = new ArrayList<>();
+        listaProductosOriginal = db.productoDao().getAllProductos();
+        if (listaProductosOriginal == null || listaProductosOriginal.isEmpty()) {
+            listaProductosOriginal = new ArrayList<>();
 
             Producto p1 = new Producto();
             p1.setId(1);
             p1.setNombre("🍔 Hamburguesa");
             p1.setDescripcion("Hamburguesa con queso, lechuga y tomate");
             p1.setPrecio(8.99);
-            p1.setCategoria("Plato fuerte");
-            p1.setDisponible(true);
-            listaProductos.add(p1);
+            listaProductosOriginal.add(p1);
 
             Producto p2 = new Producto();
             p2.setId(2);
             p2.setNombre("🍕 Pizza Pepperoni");
             p2.setDescripcion("Pizza pepperoni con queso mozzarella");
             p2.setPrecio(12.99);
-            p2.setCategoria("Plato fuerte");
-            p2.setDisponible(true);
-            listaProductos.add(p2);
+            listaProductosOriginal.add(p2);
 
             Producto p3 = new Producto();
             p3.setId(3);
             p3.setNombre("🍟 Papas fritas");
             p3.setDescripcion("Papas crujientes");
             p3.setPrecio(3.50);
-            p3.setCategoria("Acompañamiento");
-            p3.setDisponible(true);
-            listaProductos.add(p3);
+            listaProductosOriginal.add(p3);
 
             Producto p4 = new Producto();
             p4.setId(4);
             p4.setNombre("🥤 Refresco Cola");
             p4.setDescripcion("Refresco de cola bien frío");
             p4.setPrecio(2.50);
-            p4.setCategoria("Bebida");
-            p4.setDisponible(true);
-            listaProductos.add(p4);
+            listaProductosOriginal.add(p4);
 
             Producto p5 = new Producto();
             p5.setId(5);
             p5.setNombre("🌮 Tacos al Pastor");
             p5.setDescripcion("Tacos al pastor con piña y cilantro");
             p5.setPrecio(6.99);
-            p5.setCategoria("Plato fuerte");
-            p5.setDisponible(true);
-            listaProductos.add(p5);
+            listaProductosOriginal.add(p5);
 
             Producto p6 = new Producto();
             p6.setId(6);
             p6.setNombre("🍰 Pastel Chocolate");
             p6.setDescripcion("Pastel de chocolate con crema");
             p6.setPrecio(4.99);
-            p6.setCategoria("Postre");
-            p6.setDisponible(true);
-            listaProductos.add(p6);
-
-            Producto p7 = new Producto();
-            p7.setId(7);
-            p7.setNombre("🥗 Ensalada César");
-            p7.setDescripcion("Ensalada César con pollo y aderezo");
-            p7.setPrecio(7.99);
-            p7.setCategoria("Entrada");
-            p7.setDisponible(true);
-            listaProductos.add(p7);
-
-            Producto p8 = new Producto();
-            p8.setId(8);
-            p8.setNombre("🍜 Sopa de Pollo");
-            p8.setDescripcion("Sopa de pollo con verduras");
-            p8.setPrecio(5.99);
-            p8.setCategoria("Entrada");
-            p8.setDisponible(true);
-            listaProductos.add(p8);
+            listaProductosOriginal.add(p6);
         }
+        listaProductos = new ArrayList<>(listaProductosOriginal);
+    }
+
+    private void filtrarProductos(String texto) {
+        listaProductos.clear();
+        if (texto == null || texto.trim().isEmpty()) {
+            listaProductos.addAll(listaProductosOriginal);
+        } else {
+            String busqueda = texto.toLowerCase().trim();
+            for (Producto p : listaProductosOriginal) {
+                if (p.getNombre().toLowerCase().contains(busqueda)) {
+                    listaProductos.add(p);
+                }
+            }
+        }
+        productoAdapter.actualizarLista(listaProductos);
     }
 
     private void agregarAlCarrito(Producto producto) {
-        // Buscar si ya existe en el carrito
         for (ItemCarrito item : carrito) {
             if (item.getProductoId() == producto.getId()) {
                 item.setCantidad(item.getCantidad() + 1);
@@ -169,7 +193,6 @@ public class NuevoPedidoActivity extends AppCompatActivity {
                 return;
             }
         }
-        // Si no existe, agregar nuevo
         carrito.add(new ItemCarrito(producto.getId(), producto.getNombre(), 1, producto.getPrecio()));
         actualizarCarrito();
         Toast.makeText(this, "✅ Agregado: " + producto.getNombre(), Toast.LENGTH_SHORT).show();
@@ -195,7 +218,6 @@ public class NuevoPedidoActivity extends AppCompatActivity {
             subtotal += item.getSubtotal();
 
             View itemView = getLayoutInflater().inflate(R.layout.item_carrito, null);
-
             TextView tvNombre = itemView.findViewById(R.id.tvNombreCarrito);
             TextView tvCantidad = itemView.findViewById(R.id.tvCantidadCarrito);
             TextView tvPrecio = itemView.findViewById(R.id.tvPrecioCarrito);
