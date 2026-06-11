@@ -8,6 +8,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -34,6 +35,21 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Aplicar tema guardado ANTES de cargar la vista
+        preferences = getSharedPreferences("RestaurantPrefs", MODE_PRIVATE);
+        int themeMode = preferences.getInt("theme_mode", 2);
+        switch (themeMode) {
+            case 0:
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                break;
+            case 1:
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                break;
+            case 2:
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                break;
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
@@ -59,7 +75,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
 
         // Obtener usuario logueado
-        preferences = getSharedPreferences("RestaurantPrefs", MODE_PRIVATE);
         usuarioLogueado = preferences.getString("loggedUser", "Usuario");
 
         // Configurar BottomNavigationView
@@ -136,7 +151,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 getSupportActionBar().setTitle("Perfil");
             }
         } else if (id == R.id.nav_config) {
-            Toast.makeText(this, "Configuración - Próximamente", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, ConfiguracionActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_salir) {
             // Cerrar sesión
             SharedPreferences.Editor editor = preferences.edit();

@@ -20,4 +20,10 @@ public interface DetallePedidoDao {
 
     @Query("DELETE FROM detalle_pedido WHERE pedido_id = :pedidoId")
     void deleteDetallesByPedido(int pedidoId);
+
+    @Query("DELETE FROM detalle_pedido")
+    void deleteAll();
+
+    @Query("SELECT * FROM detalle_pedido")
+    List<DetallePedido> getAllDetalles();
 }

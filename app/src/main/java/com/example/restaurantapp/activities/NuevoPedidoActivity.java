@@ -28,6 +28,7 @@ public class NuevoPedidoActivity extends AppCompatActivity {
     private LinearLayout layoutCarrito;
     private TextView tvSubtotal, tvImpuesto, tvTotal, tvCarritoVacio;
     private Button btnConfirmarPedido;
+    private LinearLayout layoutTotales;
 
     private AppDatabase db;
     private List<Producto> listaProductos;
@@ -46,17 +47,18 @@ public class NuevoPedidoActivity extends AppCompatActivity {
         etNotas = findViewById(R.id.etNotas);
         rvProductos = findViewById(R.id.rvProductos);
         layoutCarrito = findViewById(R.id.layoutCarrito);
+        tvCarritoVacio = findViewById(R.id.tvCarritoVacio);
+        layoutTotales = findViewById(R.id.layoutTotales);
         tvSubtotal = findViewById(R.id.tvSubtotal);
         tvImpuesto = findViewById(R.id.tvImpuesto);
         tvTotal = findViewById(R.id.tvTotal);
-        tvCarritoVacio = findViewById(R.id.tvCarritoVacio);
         btnConfirmarPedido = findViewById(R.id.btnConfirmarPedido);
 
         // Configurar Toolbar
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("🍽️ Nuevo Pedido");
+            getSupportActionBar().setTitle("Nuevo Pedido");
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
@@ -81,39 +83,78 @@ public class NuevoPedidoActivity extends AppCompatActivity {
     private void cargarProductos() {
         listaProductos = db.productoDao().getAllProductos();
         if (listaProductos == null || listaProductos.isEmpty()) {
-            // Datos de ejemplo con IDs diferentes
             listaProductos = new ArrayList<>();
 
-            Producto p1 = new Producto("🍔 Hamburguesa", "Hamburguesa con queso", 8.99, "", "Plato fuerte", true);
+            Producto p1 = new Producto();
             p1.setId(1);
+            p1.setNombre("🍔 Hamburguesa");
+            p1.setDescripcion("Hamburguesa con queso, lechuga y tomate");
+            p1.setPrecio(8.99);
+            p1.setCategoria("Plato fuerte");
+            p1.setDisponible(true);
             listaProductos.add(p1);
 
-            Producto p2 = new Producto("🍕 Pizza Pepperoni", "Pizza pepperoni con queso mozzarella", 12.99, "", "Plato fuerte", true);
+            Producto p2 = new Producto();
             p2.setId(2);
+            p2.setNombre("🍕 Pizza Pepperoni");
+            p2.setDescripcion("Pizza pepperoni con queso mozzarella");
+            p2.setPrecio(12.99);
+            p2.setCategoria("Plato fuerte");
+            p2.setDisponible(true);
             listaProductos.add(p2);
 
-            Producto p3 = new Producto("🍟 Papas fritas", "Papas crujientes", 3.50, "", "Acompañamiento", true);
+            Producto p3 = new Producto();
             p3.setId(3);
+            p3.setNombre("🍟 Papas fritas");
+            p3.setDescripcion("Papas crujientes");
+            p3.setPrecio(3.50);
+            p3.setCategoria("Acompañamiento");
+            p3.setDisponible(true);
             listaProductos.add(p3);
 
-            Producto p4 = new Producto("🥤 Refresco Cola", "Refresco de cola bien frío", 2.50, "", "Bebida", true);
+            Producto p4 = new Producto();
             p4.setId(4);
+            p4.setNombre("🥤 Refresco Cola");
+            p4.setDescripcion("Refresco de cola bien frío");
+            p4.setPrecio(2.50);
+            p4.setCategoria("Bebida");
+            p4.setDisponible(true);
             listaProductos.add(p4);
 
-            Producto p5 = new Producto("🌮 Tacos al Pastor", "Tacos al pastor con piña y cilantro", 6.99, "", "Plato fuerte", true);
+            Producto p5 = new Producto();
             p5.setId(5);
+            p5.setNombre("🌮 Tacos al Pastor");
+            p5.setDescripcion("Tacos al pastor con piña y cilantro");
+            p5.setPrecio(6.99);
+            p5.setCategoria("Plato fuerte");
+            p5.setDisponible(true);
             listaProductos.add(p5);
 
-            Producto p6 = new Producto("🍰 Pastel Chocolate", "Pastel de chocolate con crema", 4.99, "", "Postre", true);
+            Producto p6 = new Producto();
             p6.setId(6);
+            p6.setNombre("🍰 Pastel Chocolate");
+            p6.setDescripcion("Pastel de chocolate con crema");
+            p6.setPrecio(4.99);
+            p6.setCategoria("Postre");
+            p6.setDisponible(true);
             listaProductos.add(p6);
 
-            Producto p7 = new Producto("🥗 Ensalada César", "Ensalada César con pollo", 7.99, "", "Entrada", true);
+            Producto p7 = new Producto();
             p7.setId(7);
+            p7.setNombre("🥗 Ensalada César");
+            p7.setDescripcion("Ensalada César con pollo y aderezo");
+            p7.setPrecio(7.99);
+            p7.setCategoria("Entrada");
+            p7.setDisponible(true);
             listaProductos.add(p7);
 
-            Producto p8 = new Producto("🍜 Sopa de Pollo", "Sopa de pollo con verduras", 5.99, "", "Entrada", true);
+            Producto p8 = new Producto();
             p8.setId(8);
+            p8.setNombre("🍜 Sopa de Pollo");
+            p8.setDescripcion("Sopa de pollo con verduras");
+            p8.setPrecio(5.99);
+            p8.setCategoria("Entrada");
+            p8.setDisponible(true);
             listaProductos.add(p8);
         }
     }
@@ -139,13 +180,14 @@ public class NuevoPedidoActivity extends AppCompatActivity {
 
         if (carrito.isEmpty()) {
             tvCarritoVacio.setVisibility(View.VISIBLE);
-            tvSubtotal.setText("$0.00");
-            tvImpuesto.setText("$0.00");
-            tvTotal.setText("$0.00");
+            layoutCarrito.setVisibility(View.GONE);
+            layoutTotales.setVisibility(View.GONE);
             return;
         }
 
         tvCarritoVacio.setVisibility(View.GONE);
+        layoutCarrito.setVisibility(View.VISIBLE);
+        layoutTotales.setVisibility(View.VISIBLE);
 
         double subtotal = 0;
 
@@ -153,9 +195,10 @@ public class NuevoPedidoActivity extends AppCompatActivity {
             subtotal += item.getSubtotal();
 
             View itemView = getLayoutInflater().inflate(R.layout.item_carrito, null);
-            TextView tvNombre = itemView.findViewById(R.id.tvNombre);
-            TextView tvCantidad = itemView.findViewById(R.id.tvCantidad);
-            TextView tvPrecio = itemView.findViewById(R.id.tvPrecio);
+
+            TextView tvNombre = itemView.findViewById(R.id.tvNombreCarrito);
+            TextView tvCantidad = itemView.findViewById(R.id.tvCantidadCarrito);
+            TextView tvPrecio = itemView.findViewById(R.id.tvPrecioCarrito);
             Button btnMas = itemView.findViewById(R.id.btnMas);
             Button btnMenos = itemView.findViewById(R.id.btnMenos);
             Button btnEliminar = itemView.findViewById(R.id.btnEliminar);

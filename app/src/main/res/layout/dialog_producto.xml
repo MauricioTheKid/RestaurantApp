@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#FFFFFF">
+
+    <EditText
+        android:id="@+id/etNombre"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Nombre del producto"
+        android:padding="12dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/edittext_background"
+        android:textColor="#333333"
+        android:textColorHint="#999999" />
+
+    <EditText
+        android:id="@+id/etDescripcion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Descripción"
+        android:padding="12dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/edittext_background"
+        android:textColor="#333333"
+        android:textColorHint="#999999" />
+
+    <EditText
+        android:id="@+id/etPrecio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Precio"
+        android:inputType="numberDecimal"
+        android:padding="12dp"
+        android:background="@drawable/edittext_background"
+        android:textColor="#333333"
+        android:textColorHint="#999999" />
+
+</LinearLayout>

@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import com.example.restaurantapp.R;
 
 public class LoginActivity extends AppCompatActivity {
@@ -17,6 +18,21 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Aplicar tema guardado ANTES de cargar la vista
+        preferences = getSharedPreferences("RestaurantPrefs", MODE_PRIVATE);
+        int themeMode = preferences.getInt("theme_mode", 2);
+        switch (themeMode) {
+            case 0:
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                break;
+            case 1:
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                break;
+            case 2:
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                break;
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
@@ -25,9 +41,6 @@ public class LoginActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
         btnRegister = findViewById(R.id.btnRegister);
-
-        // Inicializar SharedPreferences
-        preferences = getSharedPreferences("RestaurantPrefs", MODE_PRIVATE);
 
         // Verificar si ya hay sesión activa
         if (preferences.getBoolean("isLoggedIn", false)) {
